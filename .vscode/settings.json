@@ -1,6 +1,10 @@
 {
     "files.associations": {
         "chrono": "cpp",
-        "ratio": "cpp"
+        "ratio": "cpp",
+        "__mutex_base": "cpp",
+        "memory": "cpp",
+        "mutex": "cpp",
+        "thread": "cpp"
     }
 }

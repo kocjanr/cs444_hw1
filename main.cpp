@@ -5,13 +5,14 @@
 #include <cstdlib>
 #include <thread>
 #include <mutex>
+#include <pthread.h>
 
 struct Item {
     int ID;
     int SleepTime;
 };
 
-std::vector <Item*> buffer;
+std::vector<pthread_t> threads;
 std::mutex mu;
 
 int num_prod;
@@ -20,6 +21,7 @@ int buf_size;
 int num_items;
 int bufferCount;
 int leftOver;
+Item *buffer;
 
 void *producer(void* args){
     int threadId = *((int*)(&args));
@@ -38,7 +40,7 @@ void *producer(void* args){
         temp->ID = i;
         temp->SleepTime = (rand() % 700) + 200;
         mu.lock();
-        buffer.push_back(temp);
+        buffer[i] = temp;
         mu.unlock();
         free(temp);
     }
@@ -53,6 +55,7 @@ int main(int argc, char**argv){
     num_cons = atoi(argv[2]);
     buf_size = atoi(argv[3]);
     num_items = atoi(argv[4]);
+    buffer = new Item[buf_size];
     
     if (argc < 4){
         fprintf(stderr,"usage: ./hw1 <num of producers> <num of consumers> <buffer size> <number of items created> \n");
@@ -63,17 +66,18 @@ int main(int argc, char**argv){
         pthread_t thread;
 
         for(int i=0; i < num_prod; i++){
+            printf("thread create i: %i \n", i);
             int create = pthread_create(&thread,NULL,producer,(void*)i);
         }
+        printf("here!\n");
 
         //join threads
         for(int j=0; j< num_prod; j++){
+            printf("thread joined i: %i \n", j);
             int join = pthread_join(thread,NULL);
         }
 
-    } else{
-        //not even amount
-    }
+    } 
 
     return 0;
 }
