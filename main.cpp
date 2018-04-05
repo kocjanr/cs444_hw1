@@ -13,6 +13,7 @@ struct Item {
 
 std::vector <Item*> buffer;
 std::mutex mu;
+
 int num_prod;
 int num_cons;
 int buf_size;
@@ -32,18 +33,15 @@ void *producer(void* args){
     unsigned int sleep = (rand() % 400) + 300;
     usleep(sleep);
 
-    // for(int i=0; i < count; i++){
-    //     Item *temp = (Item*)malloc(sizeof(Item));
-    //     if(temp == NULL){
-    //         fprintf(stderr,"Can not create Item object.");
-    //     }
-    //     temp->ID = i;
-    //     temp->SleepTime = (rand() % 700) + 200;
-    //     mu.lock();
-    //     buffer.push_back(temp);
-    //     mu.unlock();
-    //     free(temp);
-    // }
+    for (int i =start; i < end; start++){
+        Item *temp = (Item*)malloc(sizeof(Item));
+        temp->ID = i;
+        temp->SleepTime = (rand() % 700) + 200;
+        mu.lock();
+        buffer.push_back(temp);
+        mu.unlock();
+        free(temp);
+    }
 }
 
 void *consumer(void *args){
@@ -56,20 +54,25 @@ int main(int argc, char**argv){
     buf_size = atoi(argv[3]);
     num_items = atoi(argv[4]);
     
-
     if (argc < 4){
         fprintf(stderr,"usage: ./hw1 <num of producers> <num of consumers> <buffer size> <number of items created> \n");
     }
 
-    //create threads
-    pthread_t thread;
-    for(int i=0; i < num_prod; i++){
-        int create = pthread_create(&thread,NULL,producer,(void*)i);
-    }
+    if(num_items%num_prod == 0){
+        //create threads
+        pthread_t thread;
 
-    //join threads
-    for(int j=0; j< num_prod; j++){
-        int join = pthread_join(thread,NULL);
+        for(int i=0; i < num_prod; i++){
+            int create = pthread_create(&thread,NULL,producer,(void*)i);
+        }
+
+        //join threads
+        for(int j=0; j< num_prod; j++){
+            int join = pthread_join(thread,NULL);
+        }
+
+    } else{
+        //not even amount
     }
 
     return 0;
