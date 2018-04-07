@@ -5,6 +5,9 @@
         "__mutex_base": "cpp",
         "memory": "cpp",
         "mutex": "cpp",
-        "thread": "cpp"
+        "thread": "cpp",
+        "__split_buffer": "cpp",
+        "string": "cpp",
+        "vector": "cpp"
     }
 }
