@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <ctime>
 #include <cstdlib>
-#include <pthread.h>
+#include <thread>
 #include <semaphore.h>
 
 struct Item {
@@ -11,7 +11,7 @@ struct Item {
     int SleepTime;
 };
 
-std::vector<Item*> buffer;
+std::vector<Item> buffer;
 sem_t producerSem;
 sem_t consumerSem;
 std::mutex mtx;
@@ -23,51 +23,45 @@ int num_items;
 int bufferCount;
 int leftOver;
 
-void *producer(void* args){
-    int threadId = *((int*)(&args));
+void producer(int args){
+    int threadId = args;
     int itemsPerThread = num_items/num_prod;
     int start = threadId * itemsPerThread;
-    int end = ((threadId+1)*itemsPerThread)-1;
+    int end = ((threadId+1)*itemsPerThread);
 
-    printf("Producer threadID: %i start: %i end: %i \n", threadId,start,end);
+    // printf("Producer threadID: %i start: %i end: %i \n", threadId,start,end);
     
     srand (time(NULL));
     unsigned int sleep = (rand() % 400) + 300;
     usleep(sleep);
 
-    for (int i =start; i < end; start++){
-        Item *temp = (Item*)malloc(sizeof(Item));
-        temp->ID = i;
-        temp->SleepTime = (rand() % 700) + 200;
-
+    for (int i =start; i < end; i++){
+        Item temp;
+        temp.ID = i;
+        temp.SleepTime = (rand() % 700) + 200;
         mtx.lock();
         buffer.push_back(temp);
+        // printf("PRODUCER:%i\n",temp.ID);
         mtx.unlock();
-
-        sem_post(&consumerSem);
-
-        free(temp);
     }
 }
 
-void *consumer(void *args){
-    while(1){
-        sem_wait(&producerSem);
+void consumer(int args){
+    int threadId = args;
+    int itemsPerThread = num_items/num_cons;
+    int start = threadId * itemsPerThread;
+    int end = ((threadId+1)*itemsPerThread);
+    printf("Consumer threadID: %i start: %i end: %i \n", threadId,start,end);
 
-        Item *temp;
+    for(int i=start;i<end;i++){
+        Item temp;
         mtx.lock();
-        temp = buffer[num_items-1];
-        mtx.unlock();
-        
-        int id = temp->ID;
-        int sleepTime = temp->SleepTime;
-
+        temp = buffer.back();
         buffer.pop_back();
-
-        usleep(sleepTime);
-
+        printf("CONSUMER:%i\n",temp.ID);
+        mtx.unlock();
     }
-
+        
 }
 
 int main(int argc, char**argv){
@@ -75,28 +69,31 @@ int main(int argc, char**argv){
     num_cons = atoi(argv[2]);
     buf_size = atoi(argv[3]);
     num_items = atoi(argv[4]);
-
-    sem_open("pSem", O_CREAT | O_EXCL, 0644, 0);
     
     if (argc < 4){
         fprintf(stderr,"usage: ./hw1 <num of producers> <num of consumers> <buffer size> <number of items created> \n");
     }
 
-    pthread_t threads[num_prod];
     if(num_items%num_prod == 0){
-        //create threads
-        pthread_t producerThread;
-         pthread_t consumerThread;
+        std::vector<std::thread> threads;
+        std::vector<std::thread> consumerThreads;
 
-        for(int i=0; i < num_prod; i++){
-            printf("producer thread create i: %i \n", i);
-            pthread_create(&producerThread,NULL,producer,(void*)i);
+        for(int i=0;i<num_prod;i++){
+            threads.push_back(std::thread(producer,i));
+        }
+        
+        for(int j=0;j<num_prod;j++){
+            threads[j].join();
         }
 
-        for(int i=0; i < num_cons; i++){
-            printf("consumer thread create i: %i \n", i);
-            pthread_create(&consumerThread,NULL,consumer,(void*)i);
+        for(int a=0;a<num_cons;a++){
+            consumerThreads.push_back(std::thread(consumer,a));
         }
+
+         for(int b=0;b<num_cons;b++){
+            consumerThreads[b].join();
+        }
+
     } 
 
     return 0;

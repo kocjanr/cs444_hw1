@@ -1,2 +1,2 @@
 all:
-	g++ -pthread -w -o hw1  main.cpp
+	clang++ -std=c++11 -w -o hw1  main.cpp
