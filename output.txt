@@ -1,11 +1,10 @@
 0: consuming 4
 1: consuming 3
 0: consuming 2
-1: consuming 1
-0: consuming 0
-1: consuming 9
+0: consuming 1
+1: consuming 0
+0: consuming 9
 1: consuming 8
-0: consuming 7
-1: consuming 6
-0: consuming 5
-DONE PRODUCING!!
+1: consuming 7
+0: consuming 6
+1: consuming 5
