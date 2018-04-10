@@ -76,7 +76,7 @@ void consumer(int args){
         temp = buffer.back();
         buffer.pop_back();
         mtx.unlock();
-        // printf("%i: consuming %i\n",args, temp.ID);
+        printf("%i: consuming %i\n",args, temp.ID);
         usleep(temp.SleepTime);
     }   
     sem_post(&numberOfSlots);
@@ -95,7 +95,7 @@ int main(int argc, char**argv){
         fprintf(stderr,"usage: ./hw1 <num of producers> <num of consumers> <buffer size> <number of items created> \n");
     }
 
-        std::vector<std::thread> threads;
+        std::vector<std::thread> producerThreads;
         std::vector<std::thread> consumerThreads;
 
         for(int a=0;a<num_cons;a++){
@@ -103,11 +103,15 @@ int main(int argc, char**argv){
         }
 
         for(int i=0;i<num_prod;i++){
-            threads.push_back(std::thread(producer,i));
+            producerThreads.push_back(std::thread(producer,i));
         }
         
+        for(int j=0;j<num_cons;j++){
+            consumerThreads[j].join();
+        }
+
         for(int j=0;j<num_prod;j++){
-            threads[j].join();
+            producerThreads[j].join();
         }
 
         printf("DONE PRODUCING!!\n");
