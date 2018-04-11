@@ -47,7 +47,10 @@ void producer(int args){
     unsigned int sleep = (rand() % 400) + 300;
     usleep(sleep);
 
-    sem_wait(&numberOfSlots);
+    int wait = sem_wait(&numberOfSlots);
+    if(wait == -1){
+        fprintf(stderr,"Issue with semaphore waiting.")
+    }
 
     for(int i=start; i < end; i++){
         Item temp;
@@ -58,7 +61,10 @@ void producer(int args){
         mtx.unlock();
     }
 
-    sem_post(&itemsToConsume);
+    int post = sem_post(&itemsToConsume);
+    if(post == -1){
+        fprintf(stderr,"Issue with semaphore posting.")
+    }
 }
 
 //void consumer(int args)
@@ -90,7 +96,10 @@ void consumer(int args){
     
     // sem_wait(&itemsToConsume);
     
-    sem_wait(&itemsToConsume);
+    int wait = sem_wait(&itemsToConsume);
+    if(wait == -1){
+        fprintf(stderr,"Semaphore can not wait.");
+    }
     for(int i=start;i<end;i++){
         Item temp;
 
@@ -102,7 +111,10 @@ void consumer(int args){
         fflush(stdout);
         usleep(temp.SleepTime);
         
-        sem_post(&numberOfSlots);
+        int post = sem_post(&numberOfSlots);
+        if(post == -1){
+            fprint(stderr,"Semaphore can not post.")
+        }
     }    
 }
 
