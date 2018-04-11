@@ -73,21 +73,24 @@ void consumer(int args){
     int start = threadId * itemsPerThread;
     int end = ((threadId+1)*itemsPerThread);
 
-    //sem_wait(&itemsToConsume);
+    
     // while(1){
-        
+    //     sem_wait(&itemsToConsume);
+
     //     Item temp;
     //     mtx.lock();
     //     temp = buffer.back();
     //     buffer.pop_back();
     //     mtx.unlock();
     //     printf("%i: consuming %i\n",args, temp.ID);
+    //     fflush(stdout);
     //     usleep(temp.SleepTime);
-        
     // }
-    //sem_post(&numberOfSlots);
-    sem_wait(&itemsToConsume);
+    // sem_post(&numberOfSlots);
     
+    // sem_wait(&itemsToConsume);
+    
+    sem_wait(&itemsToConsume);
     for(int i=start;i<end;i++){
         Item temp;
         mtx.lock();
@@ -95,10 +98,10 @@ void consumer(int args){
         buffer.pop_back();
         mtx.unlock();
         printf("%i: consuming %i\n",args, temp.ID);
+        fflush(stdout);
         usleep(temp.SleepTime);
-    }   
-
-    sem_post(&numberOfSlots);
+        sem_post(&numberOfSlots);
+    }    
 }
 
 // void signalHandler(int param)
@@ -107,6 +110,7 @@ void consumer(int args){
 // signal this function will exit
 // the program
 void signalHandler(int param){
+    printf("PROGRAM EXIT\n");
     exit(1);
 }
 
@@ -137,6 +141,8 @@ int main(int argc, char**argv){
     for(int i=0;i<num_prod;i++){
         producerThreads.push_back(std::thread(producer,i));
     }
+
+    fprintf(stderr,"Done Producing!!\n");
     
     //Join consumer threads
     for(int j=0;j<num_cons;j++){
@@ -149,7 +155,6 @@ int main(int argc, char**argv){
     }
 
     signal(SIGINT, signalHandler);
-    fprintf(stderr,"Done Producing!!\n");
     
     return 0;
 }
