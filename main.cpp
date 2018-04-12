@@ -63,7 +63,7 @@ void producer(int args){
 
     int post = sem_post(&itemsToConsume);
     if(post == -1){
-        fprintf(stderr,"Issue with semaphore posting.")
+        fprintf(stderr,"Issue with semaphore posting.");
     }
 }
 
@@ -113,7 +113,7 @@ void consumer(int args){
         
         int post = sem_post(&numberOfSlots);
         if(post == -1){
-            fprint(stderr,"Semaphore can not post.");
+            fprintf(stderr,"Semaphore can not post.");
         }
     }    
 }
